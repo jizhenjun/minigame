@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>弹球大作战 · 种子控制布局</title>
+    <title>弹球大作战 · 自定义砖块地图</title>
     <style>
         * {
             margin: 0;
@@ -28,7 +28,7 @@
             border-radius: 28px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.04);
-            max-width: 900px;
+            max-width: 920px;
             width: 100%;
         }
 
@@ -222,6 +222,19 @@
             padding: 4px 8px;
             font-size: 13px;
             width: 80px;
+        }
+        .config-item textarea {
+            background: #0d1424;
+            border: 1px solid #2a3a5a;
+            border-radius: 6px;
+            color: #ddeeff;
+            padding: 6px 8px;
+            font-size: 13px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            min-height: 80px;
+            width: 100%;
+            line-height: 1.4;
         }
         .config-actions {
             display: flex;
@@ -470,11 +483,18 @@
                     <label>体力消耗系数 <span class="value-display" id="valCost">0.08</span></label>
                     <input type="range" id="staminaCost" min="0.02" max="0.20" value="0.08" step="0.005">
                 </div>
-                <!-- 随机种子 (新增) -->
+                <!-- 随机种子 -->
                 <div class="config-item">
                     <label>随机种子 <span class="value-display" id="valSeed">0</span></label>
                     <input type="number" id="seedInput" value="0" step="1" min="0" style="background:#0d1424;border:1px solid #2a3a5a;border-radius:6px;color:#ddeeff;padding:4px 8px;font-size:13px;width:80px;">
                     <span style="font-size:11px;color:#5a6a8a;">0=随机，非0=固定布局</span>
+                </div>
+
+                <!-- 自定义砖块地图 (新增) -->
+                <div class="config-item" style="grid-column: 1 / -1;">
+                    <label>✏️ 自定义砖块地图 <span style="font-size:11px;color:#5a6a8a;">（用 # 表示砖块，. 表示空格，换行分隔）</span></label>
+                    <textarea id="brickMap" placeholder="例如：\n#####\n#...#\n#####"></textarea>
+                    <span style="font-size:11px;color:#5a6a8a;">留空则使用上方行列数生成网格</span>
                 </div>
 
                 <div class="config-actions">
@@ -484,6 +504,7 @@
                     <button class="btn-preset" data-preset="dense">密集</button>
                     <button class="btn-preset" data-preset="practice">练习</button>
                     <button class="btn-preset" data-preset="chaos">混乱</button>
+                    <button class="btn-preset" data-preset="custom1">自定义示例</button>
                 </div>
             </div>
         </div>
@@ -494,7 +515,8 @@
                 <span>🖱️ 任意方向拖动画板</span>
                 <span class="key-icon">边框反弹</span>
                 <span>⏱️ 板子持续3s</span>
-                <span>🌱 种子控制布局</span>
+                <span>🌱 种子控制陷阱/星星</span>
+                <span>🧱 自定义砖块地图</span>
             </div>
             <button class="btn-reset" id="resetBtn">🔄 重开</button>
         </div>
@@ -502,7 +524,7 @@
 
     <script>
         // ============================================================
-        //  游戏主程序 - 支持随机种子控制元素位置
+        //  游戏主程序 - 支持自定义砖块地图
         // ============================================================
 
         const canvas = document.getElementById('gameCanvas');
@@ -537,6 +559,7 @@
             staminaRegen: document.getElementById('staminaRegen'),
             staminaCost: document.getElementById('staminaCost'),
             seed: document.getElementById('seedInput'),
+            brickMap: document.getElementById('brickMap'),
         };
         const displays = {
             brickRows: document.getElementById('valRows'),
@@ -557,19 +580,15 @@
         class SeededRandom {
             constructor(seed) {
                 this.seed = seed || 0;
-                // 保证种子为正整数
                 this.seed = (this.seed >>> 0);
             }
-            // 线性同余生成器 (LCG)
             next() {
                 this.seed = (this.seed * 9301 + 49297) % 233280;
                 return this.seed / 233280;
             }
-            // 返回 [min, max) 之间的随机数
             nextRange(min, max) {
                 return min + this.next() * (max - min);
             }
-            // 返回 [min, max] 之间的整数
             nextInt(min, max) {
                 return Math.floor(this.nextRange(min, max + 1));
             }
@@ -594,24 +613,20 @@
             starCount: 7,
             starRadius: 11,
             trapRadius: 14,
-            seed: 0, // 0 表示随机（基于时间）
+            seed: 0,
+            brickMap: '', // 自定义地图字符串
         };
 
         // ============================================================
         //  游戏状态
         // ============================================================
         let game = {};
-        let rng = null; // 当前使用的随机数生成器
+        let rng = null;
 
         function initGame() {
-            // 同步配置
             syncConfigFromUI();
-
-            // 设置种子
             let seed = CONFIG.seed;
-            if (seed === 0) {
-                seed = Date.now() & 0x7fffffff; // 使用时间作为种子
-            }
+            if (seed === 0) seed = Date.now() & 0x7fffffff;
             rng = new SeededRandom(seed);
 
             game = {
@@ -661,8 +676,8 @@
             CONFIG.staminaRegen = parseFloat(inputs.staminaRegen.value);
             CONFIG.staminaCostPerPixel = parseFloat(inputs.staminaCost.value);
             CONFIG.seed = parseInt(inputs.seed.value) || 0;
+            CONFIG.brickMap = inputs.brickMap.value;
 
-            // 更新显示
             for (const key in displays) {
                 if (displays[key] && inputs[key]) {
                     displays[key].textContent = inputs[key].value;
@@ -674,13 +689,16 @@
         function applyPreset(name) {
             const presets = {
                 classic: { rows: 5, cols: 10, speed: 4.2, lives: 3, traps: 10, stars: 7, dur: 180, regen: 0.12, cost: 0.08,
-                    seed: 0 },
+                    seed: 0, map: '' },
                 dense: { rows: 7, cols: 12, speed: 4.8, lives: 4, traps: 12, stars: 5, dur: 200, regen: 0.10, cost: 0.07,
-                    seed: 42 },
+                    seed: 42, map: '' },
                 practice: { rows: 3, cols: 6, speed: 3.0, lives: 5, traps: 3, stars: 10, dur: 240, regen: 0.20, cost: 0.05,
-                    seed: 123 },
+                    seed: 123, map: '' },
                 chaos: { rows: 6, cols: 14, speed: 5.5, lives: 2, traps: 18, stars: 12, dur: 150, regen: 0.06, cost: 0.12,
-                    seed: 999 },
+                    seed: 999, map: '' },
+                custom1: { rows: 5, cols: 10, speed: 4.2, lives: 3, traps: 8, stars: 6, dur: 180, regen: 0.12, cost: 0.08,
+                    seed: 0,
+                    map: '#####\n#...#\n#####\n#...#\n#####' },
             };
             const p = presets[name];
             if (!p) return;
@@ -694,6 +712,7 @@
             inputs.staminaRegen.value = p.regen;
             inputs.staminaCost.value = p.cost;
             inputs.seed.value = p.seed;
+            inputs.brickMap.value = p.map;
             for (const key in displays) {
                 if (displays[key] && inputs[key]) {
                     displays[key].textContent = inputs[key].value;
@@ -708,9 +727,54 @@
         }
 
         // ============================================================
-        //  创建元素 (使用 rng 随机)
+        //  创建元素
         // ============================================================
         function createBricks() {
+            const map = CONFIG.brickMap.trim();
+            if (map) {
+                // 解析自定义地图
+                const lines = map.split('\n').filter(line => line.trim().length > 0);
+                const rows = lines.length;
+                const cols = lines.reduce((max, line) => Math.max(max, line.length), 0);
+                if (rows === 0 || cols === 0) {
+                    // 无效地图，退回到网格
+                    createGridBricks();
+                    return;
+                }
+                // 计算砖块大小
+                const gap = CONFIG.brickGap;
+                const usableWidth = W - 40;
+                const brickWidth = Math.max(30, (usableWidth - (cols - 1) * gap) / cols);
+                const brickHeight = Math.min(26, Math.max(14, brickWidth * 0.35));
+                const totalWidth = cols * brickWidth + (cols - 1) * gap;
+                const startX = (W - totalWidth) / 2;
+                const startY = 50;
+                const colors = ['#ff6b6b', '#f7b731', '#f7d44a', '#4ecdc4', '#45b7d1', '#a29bfe', '#fd79a8', '#00b894'];
+
+                for (let r = 0; r < rows; r++) {
+                    const line = lines[r];
+                    for (let c = 0; c < cols; c++) {
+                        const ch = (c < line.length) ? line[c] : ' ';
+                        if (ch !== '#') continue; // 只放置 '#'
+                        const x = startX + c * (brickWidth + gap);
+                        const y = startY + r * (brickHeight + gap);
+                        game.bricks.push({
+                            x,
+                            y,
+                            w: brickWidth,
+                            h: brickHeight,
+                            state: 'intact',
+                            color: colors[(r + c) % colors.length],
+                            crackAngle: rng.next() * Math.PI * 2,
+                        });
+                    }
+                }
+            } else {
+                createGridBricks();
+            }
+        }
+
+        function createGridBricks() {
             const { brickRows, brickCols, brickGap } = CONFIG;
             const totalGap = (brickCols - 1) * brickGap;
             const usableWidth = W - 40;
@@ -746,7 +810,13 @@
                 do {
                     x = margin + rng.next() * (W - 2 * margin);
                     y = 260 + rng.next() * (H - 340);
-                    overlap = game.traps.some(t => Math.hypot(t.x - x, t.y - y) < 40);
+                    overlap = game.traps.some(t => Math.hypot(t.x - x, t.y - y) < 40) ||
+                        game.bricks.some(b => {
+                            if (b.state === 'destroyed') return false;
+                            const cx = b.x + b.w / 2,
+                                cy = b.y + b.h / 2;
+                            return Math.hypot(x - cx, y - cy) < 40;
+                        });
                     attempts++;
                 } while (overlap && attempts < 50);
                 game.traps.push({
@@ -769,7 +839,13 @@
                     x = margin + rng.next() * (W - 2 * margin);
                     y = 200 + rng.next() * (H - 300);
                     overlap = game.stars.some(s => Math.hypot(s.x - x, s.y - y) < 45) ||
-                        game.traps.some(t => Math.hypot(t.x - x, t.y - y) < 45);
+                        game.traps.some(t => Math.hypot(t.x - x, t.y - y) < 45) ||
+                        game.bricks.some(b => {
+                            if (b.state === 'destroyed') return false;
+                            const cx = b.x + b.w / 2,
+                                cy = b.y + b.h / 2;
+                            return Math.hypot(x - cx, y - cy) < 45;
+                        });
                     attempts++;
                 } while (overlap && attempts < 50);
                 game.stars.push({
@@ -798,7 +874,7 @@
         }
 
         // ============================================================
-        //  工具函数 (与之前相同)
+        //  工具函数 (保持不变)
         // ============================================================
         function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
@@ -829,7 +905,7 @@
         }
 
         // ============================================================
-        //  板子绘制交互 (与之前相同)
+        //  板子绘制交互 (保持不变)
         // ============================================================
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
@@ -906,7 +982,7 @@
         canvas.addEventListener('touchend', endDraw, { passive: false });
 
         // ============================================================
-        //  更新逻辑 (与之前相同，除随机外)
+        //  更新逻辑 (保持不变，但砖块碰撞仍使用现有逻辑)
         // ============================================================
         function update() {
             if (game.state !== 'playing') return;
@@ -1540,7 +1616,7 @@
                 ctx.fillText(`🧱 ${intact}  |  🎯 任意画板  |  🌱 种子: ${CONFIG.seed || '随机'}`, 16, H - 14);
                 ctx.textAlign = 'right';
                 ctx.fillStyle = 'rgba(255,255,255,0.04)';
-                ctx.fillText(`v5.0`, W - 16, H - 14);
+                ctx.fillText(`v6.0`, W - 16, H - 14);
             }
         }
 
@@ -1609,7 +1685,6 @@
                 });
             }
         }
-        // 种子输入单独处理
         inputs.seed.addEventListener('input', () => {
             displays.seed.textContent = inputs.seed.value;
         });
@@ -1628,9 +1703,10 @@
         initGame();
         gameLoop();
 
-        console.log('🎮 弹球大作战 v5.0 - 随机种子控制布局');
-        console.log('🌱 在配置面板调整「随机种子」可复现或改变地图布局');
-        console.log('📦 预设：经典 / 密集 / 练习 / 混乱（带固定种子）');
+        console.log('🎮 弹球大作战 v6.0 - 自定义砖块地图');
+        console.log('✏️ 在配置面板的「自定义砖块地图」中用 # 和 . 自由设计砖墙');
+        console.log('🌱 种子控制陷阱和星星的位置');
+        console.log('📦 预设「自定义示例」展示了一个镂空图案');
         console.log('⌨️ 按 R 键快速重启');
     </script>
 </body>
