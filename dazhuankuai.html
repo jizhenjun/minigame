@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>弹球大作战 · 全边框反弹</title>
+    <title>弹球大作战 · 可配置关卡</title>
     <style>
         * {
             margin: 0;
@@ -19,6 +19,7 @@
             align-items: center;
             min-height: 100vh;
             font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 20px;
         }
 
         .game-wrapper {
@@ -27,6 +28,8 @@
             border-radius: 28px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 1px 2px rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.04);
+            max-width: 900px;
+            width: 100%;
         }
 
         .header {
@@ -37,6 +40,8 @@
             color: #c8d6e5;
             font-weight: 600;
             letter-spacing: 0.3px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .header-left {
@@ -44,7 +49,6 @@
             align-items: center;
             gap: 24px;
         }
-
         .header-right {
             display: flex;
             align-items: center;
@@ -129,8 +133,9 @@
 
         canvas {
             display: block;
-            width: 860px;
-            height: 620px;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 860 / 620;
             border-radius: 16px;
             background: #0d1424;
             box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.6), 0 4px 20px rgba(0, 0, 0, 0.5);
@@ -139,28 +144,139 @@
             touch-action: none;
         }
 
+        /* ---- 配置面板 ---- */
+        .config-panel {
+            margin-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 14px;
+        }
+        .config-toggle {
+            background: none;
+            border: 1px solid #2a3a5a;
+            color: #8899bb;
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+            background: #151e2e;
+        }
+        .config-toggle:hover {
+            color: #ddeeff;
+            border-color: #4a6a8a;
+        }
+        .config-grid {
+            display: none;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px 20px;
+            margin-top: 14px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 16px 18px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .config-grid.open {
+            display: grid;
+        }
+        .config-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .config-item label {
+            font-size: 12px;
+            color: #8899bb;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+        .config-item .value-display {
+            font-size: 14px;
+            color: #f7d44a;
+            font-weight: 600;
+            float: right;
+        }
+        .config-item input[type="range"] {
+            width: 100%;
+            height: 4px;
+            -webkit-appearance: none;
+            background: #1a2540;
+            border-radius: 4px;
+            outline: none;
+            margin: 4px 0;
+        }
+        .config-item input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+        }
+        .config-item input[type="number"] {
+            background: #0d1424;
+            border: 1px solid #2a3a5a;
+            border-radius: 6px;
+            color: #ddeeff;
+            padding: 4px 8px;
+            font-size: 13px;
+            width: 60px;
+        }
+        .config-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 4px;
+            grid-column: 1 / -1;
+        }
+        .btn-apply {
+            background: #4ecdc4;
+            border: none;
+            color: #0a0e1a;
+            padding: 6px 24px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.15);
+        }
+        .btn-apply:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+        }
+        .btn-preset {
+            background: #1a2540;
+            border: 1px solid #2a3a5a;
+            color: #aabbdd;
+            padding: 4px 14px;
+            border-radius: 14px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-preset:hover {
+            background: #2a3a5a;
+            color: #fff;
+        }
+
         .footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 14px;
+            padding-top: 10px;
             color: #5a6a8a;
             font-size: 13px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
-
         .hint {
             display: flex;
             align-items: center;
             gap: 16px;
             color: #6a7a9a;
-        }
-        .hint kbd {
-            background: #1a2540;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            color: #aabbdd;
-            border: 1px solid #2a3a5a;
+            flex-wrap: wrap;
         }
         .hint .key-icon {
             display: inline-block;
@@ -170,7 +286,6 @@
             font-size: 12px;
             color: #8a9abb;
         }
-
         .btn-reset {
             background: #1a2540;
             border: none;
@@ -186,30 +301,6 @@
         .btn-reset:hover {
             background: #2a3a5a;
             color: #ddeeff;
-            transform: scale(1.02);
-        }
-
-        @media (max-width: 920px) {
-            .game-wrapper {
-                padding: 12px;
-                border-radius: 18px;
-            }
-            canvas {
-                width: 100%;
-                height: auto;
-                aspect-ratio: 860 / 620;
-            }
-            .header {
-                flex-wrap: wrap;
-                gap: 8px;
-            }
-            .stamina-bar-bg {
-                width: 80px;
-            }
-            .hint {
-                font-size: 11px;
-                flex-wrap: wrap;
-            }
         }
 
         .overlay {
@@ -270,7 +361,25 @@
 
         .canvas-wrap {
             position: relative;
-            display: inline-block;
+            display: block;
+        }
+
+        @media (max-width: 700px) {
+            .config-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 6px;
+            }
+            .header-left,
+            .header-right {
+                justify-content: space-between;
+            }
+            .stamina-bar-bg {
+                width: 80px;
+            }
         }
     </style>
 </head>
@@ -311,13 +420,73 @@
             </div>
         </div>
 
+        <!-- 配置面板 -->
+        <div class="config-panel">
+            <button class="config-toggle" id="configToggle">⚙️ 关卡配置</button>
+            <div class="config-grid" id="configGrid">
+                <!-- 行 -->
+                <div class="config-item">
+                    <label>砖块行数 <span class="value-display" id="valRows">5</span></label>
+                    <input type="range" id="brickRows" min="2" max="8" value="5" step="1">
+                </div>
+                <!-- 列 -->
+                <div class="config-item">
+                    <label>砖块列数 <span class="value-display" id="valCols">10</span></label>
+                    <input type="range" id="brickCols" min="5" max="14" value="10" step="1">
+                </div>
+                <!-- 速度 -->
+                <div class="config-item">
+                    <label>小球速度 <span class="value-display" id="valSpeed">4.2</span></label>
+                    <input type="range" id="ballSpeed" min="2" max="6.5" value="4.2" step="0.1">
+                </div>
+                <!-- 生命 -->
+                <div class="config-item">
+                    <label>初始生命 <span class="value-display" id="valLives">3</span></label>
+                    <input type="range" id="maxLives" min="1" max="6" value="3" step="1">
+                </div>
+                <!-- 陷阱 -->
+                <div class="config-item">
+                    <label>陷阱数量 <span class="value-display" id="valTraps">10</span></label>
+                    <input type="range" id="trapCount" min="0" max="20" value="10" step="1">
+                </div>
+                <!-- 星星 -->
+                <div class="config-item">
+                    <label>星星数量 <span class="value-display" id="valStars">7</span></label>
+                    <input type="range" id="starCount" min="0" max="15" value="7" step="1">
+                </div>
+                <!-- 板子时长 -->
+                <div class="config-item">
+                    <label>板子持续(帧) <span class="value-display" id="valBoardDur">180</span></label>
+                    <input type="range" id="boardDuration" min="60" max="360" value="180" step="10">
+                </div>
+                <!-- 体力恢复 -->
+                <div class="config-item">
+                    <label>体力恢复/帧 <span class="value-display" id="valStamina">0.12</span></label>
+                    <input type="range" id="staminaRegen" min="0.03" max="0.30" value="0.12" step="0.01">
+                </div>
+                <!-- 体力消耗系数 -->
+                <div class="config-item">
+                    <label>体力消耗系数 <span class="value-display" id="valCost">0.08</span></label>
+                    <input type="range" id="staminaCost" min="0.02" max="0.20" value="0.08" step="0.005">
+                </div>
+
+                <div class="config-actions">
+                    <button class="btn-apply" id="applyConfigBtn">✅ 应用并重启</button>
+                    <span style="color:#5a6a8a; font-size:13px;">预设：</span>
+                    <button class="btn-preset" data-preset="classic">经典</button>
+                    <button class="btn-preset" data-preset="dense">密集</button>
+                    <button class="btn-preset" data-preset="practice">练习</button>
+                    <button class="btn-preset" data-preset="chaos">混乱</button>
+                </div>
+            </div>
+        </div>
+
         <!-- 底栏 -->
         <div class="footer">
             <div class="hint">
-                <span>🖱️ 按住鼠标任意方向拖动画板</span>
-                <span class="key-icon">长度 ↔ 消耗体力</span>
-                <span>⏱️ 板子持续 3s</span>
-                <span>🛡️ 边框只反弹不掉血</span>
+                <span>🖱️ 任意方向拖动画板</span>
+                <span class="key-icon">边框反弹</span>
+                <span>⏱️ 板子持续3s</span>
             </div>
             <button class="btn-reset" id="resetBtn">🔄 重开</button>
         </div>
@@ -325,7 +494,7 @@
 
     <script>
         // ============================================================
-        //  游戏主程序 - 全边框反弹，不掉血
+        //  游戏主程序 - 支持可视化配置
         // ============================================================
 
         const canvas = document.getElementById('gameCanvas');
@@ -333,7 +502,7 @@
         const W = 860,
             H = 620;
 
-        // DOM 元素
+        // DOM
         const livesEl = document.getElementById('livesDisplay');
         const scoreEl = document.getElementById('scoreDisplay');
         const staminaFill = document.getElementById('staminaFill');
@@ -344,8 +513,37 @@
         const overlayBtn = document.getElementById('overlayBtn');
         const resetBtn = document.getElementById('resetBtn');
 
+        // 配置UI元素
+        const configToggle = document.getElementById('configToggle');
+        const configGrid = document.getElementById('configGrid');
+        const applyBtn = document.getElementById('applyConfigBtn');
+
+        // 所有配置输入
+        const inputs = {
+            brickRows: document.getElementById('brickRows'),
+            brickCols: document.getElementById('brickCols'),
+            ballSpeed: document.getElementById('ballSpeed'),
+            maxLives: document.getElementById('maxLives'),
+            trapCount: document.getElementById('trapCount'),
+            starCount: document.getElementById('starCount'),
+            boardDuration: document.getElementById('boardDuration'),
+            staminaRegen: document.getElementById('staminaRegen'),
+            staminaCost: document.getElementById('staminaCost'),
+        };
+        const displays = {
+            brickRows: document.getElementById('valRows'),
+            brickCols: document.getElementById('valCols'),
+            ballSpeed: document.getElementById('valSpeed'),
+            maxLives: document.getElementById('valLives'),
+            trapCount: document.getElementById('valTraps'),
+            starCount: document.getElementById('valStars'),
+            boardDuration: document.getElementById('valBoardDur'),
+            staminaRegen: document.getElementById('valStamina'),
+            staminaCost: document.getElementById('valCost'),
+        };
+
         // ============================================================
-        //  配置
+        //  配置对象 (可被UI覆盖)
         // ============================================================
         const CONFIG = {
             ballRadius: 10,
@@ -358,8 +556,6 @@
             staminaCostPerPixel: 0.08,
             brickRows: 5,
             brickCols: 10,
-            brickWidth: 64,
-            brickHeight: 22,
             brickGap: 6,
             trapCount: 10,
             starCount: 7,
@@ -373,6 +569,9 @@
         let game = {};
 
         function initGame() {
+            // 从UI同步配置
+            syncConfigFromUI();
+
             game = {
                 score: 0,
                 lives: CONFIG.maxLives,
@@ -403,13 +602,76 @@
             createBall();
 
             overlay.classList.remove('show');
+            updateLivesUI();
+            updateScoreUI();
+            updateStaminaUI();
         }
 
+        // ---- 从UI同步配置 ----
+        function syncConfigFromUI() {
+            CONFIG.brickRows = parseInt(inputs.brickRows.value);
+            CONFIG.brickCols = parseInt(inputs.brickCols.value);
+            CONFIG.ballSpeed = parseFloat(inputs.ballSpeed.value);
+            CONFIG.maxLives = parseInt(inputs.maxLives.value);
+            CONFIG.trapCount = parseInt(inputs.trapCount.value);
+            CONFIG.starCount = parseInt(inputs.starCount.value);
+            CONFIG.boardDuration = parseInt(inputs.boardDuration.value);
+            CONFIG.staminaRegen = parseFloat(inputs.staminaRegen.value);
+            CONFIG.staminaCostPerPixel = parseFloat(inputs.staminaCost.value);
+
+            // 更新显示
+            for (const key in displays) {
+                if (displays[key]) {
+                    displays[key].textContent = inputs[key] ? inputs[key].value : '';
+                }
+            }
+        }
+
+        // ---- 预设 ----
+        function applyPreset(name) {
+            const presets = {
+                classic: { rows: 5, cols: 10, speed: 4.2, lives: 3, traps: 10, stars: 7, dur: 180, regen: 0.12, cost: 0.08 },
+                dense: { rows: 7, cols: 12, speed: 4.8, lives: 4, traps: 12, stars: 5, dur: 200, regen: 0.10, cost: 0.07 },
+                practice: { rows: 3, cols: 6, speed: 3.0, lives: 5, traps: 3, stars: 10, dur: 240, regen: 0.20, cost: 0.05 },
+                chaos: { rows: 6, cols: 14, speed: 5.5, lives: 2, traps: 18, stars: 12, dur: 150, regen: 0.06, cost: 0.12 },
+            };
+            const p = presets[name];
+            if (!p) return;
+            inputs.brickRows.value = p.rows;
+            inputs.brickCols.value = p.cols;
+            inputs.ballSpeed.value = p.speed;
+            inputs.maxLives.value = p.lives;
+            inputs.trapCount.value = p.traps;
+            inputs.starCount.value = p.stars;
+            inputs.boardDuration.value = p.dur;
+            inputs.staminaRegen.value = p.regen;
+            inputs.staminaCost.value = p.cost;
+            for (const key in displays) {
+                if (displays[key] && inputs[key]) {
+                    displays[key].textContent = inputs[key].value;
+                }
+            }
+            applyConfigAndReset();
+        }
+
+        // ---- 应用配置 ----
+        function applyConfigAndReset() {
+            syncConfigFromUI();
+            resetGame();
+        }
+
+        // ============================================================
+        //  创建元素 (自适应砖块宽度)
+        // ============================================================
         function createBricks() {
-            const { brickRows, brickCols, brickWidth, brickHeight, brickGap } = CONFIG;
+            const { brickRows, brickCols, brickGap } = CONFIG;
+            const totalGap = (brickCols - 1) * brickGap;
+            const usableWidth = W - 40;
+            const brickWidth = Math.max(30, (usableWidth - totalGap) / brickCols);
+            const brickHeight = Math.min(26, Math.max(14, brickWidth * 0.35));
             const startX = (W - (brickCols * (brickWidth + brickGap) - brickGap)) / 2;
             const startY = 50;
-            const colors = ['#ff6b6b', '#f7b731', '#f7d44a', '#4ecdc4', '#45b7d1', '#a29bfe'];
+            const colors = ['#ff6b6b', '#f7b731', '#f7d44a', '#4ecdc4', '#45b7d1', '#a29bfe', '#fd79a8', '#00b894'];
 
             for (let r = 0; r < brickRows; r++) {
                 for (let c = 0; c < brickCols; c++) {
@@ -421,9 +683,7 @@
                         w: brickWidth,
                         h: brickHeight,
                         state: 'intact',
-                        color: colors[r % colors.length],
-                        row: r,
-                        col: c,
+                        color: colors[(r + c) % colors.length],
                         crackAngle: Math.random() * Math.PI * 2,
                     });
                 }
@@ -522,7 +782,7 @@
         }
 
         // ============================================================
-        //  板子绘制交互 (任意方向)
+        //  板子绘制交互
         // ============================================================
         function getMousePos(e) {
             const rect = canvas.getBoundingClientRect();
@@ -567,26 +827,24 @@
                 return;
             }
             game.drawing = false;
-
             const x1 = game.drawStartX,
                 y1 = game.drawStartY;
             const x2 = game.drawEndX,
                 y2 = game.drawEndY;
             const len = dist(x1, y1, x2, y2);
             if (len < 10) return;
-
             const cost = len * CONFIG.staminaCostPerPixel;
             if (game.stamina < cost) return;
             game.stamina -= cost;
-
             game.boards.push({
-                x1, y1,
-                x2, y2,
+                x1,
+                y1,
+                x2,
+                y2,
                 w: CONFIG.boardWidth,
                 timer: CONFIG.boardDuration,
                 life: 1,
             });
-
             updateStaminaUI();
         }
 
@@ -632,7 +890,6 @@
             }
         }
 
-        // ---- 小球更新 (全边框反弹，不掉血) ----
         function updateBall() {
             const ball = game.ball;
             const r = ball.r;
@@ -650,11 +907,10 @@
 
             ball.x += ball.vx;
             ball.y += ball.vy;
-
             ball.trail.push({ x: ball.x, y: ball.y });
             if (ball.trail.length > 14) ball.trail.shift();
 
-            // ---- 四周边框反弹 (不掉血) ----
+            // 四周边框反弹
             if (ball.x - r < 0) { ball.x = r;
                 ball.vx = Math.abs(ball.vx); }
             if (ball.x + r > W) { ball.x = W - r;
@@ -664,7 +920,7 @@
             if (ball.y + r > H) { ball.y = H - r;
                 ball.vy = -Math.abs(ball.vy); }
 
-            // ---- 砖块碰撞 ----
+            // 砖块
             for (const brick of game.bricks) {
                 if (brick.state === 'destroyed') continue;
                 if (!rectCircleCollision(brick.x, brick.y, brick.w, brick.h, ball.x, ball.y, r)) continue;
@@ -693,7 +949,7 @@
                 break;
             }
 
-            // ---- 陷阱碰撞 ----
+            // 陷阱
             for (const trap of game.traps) {
                 if (!trap.active) continue;
                 if (dist(ball.x, ball.y, trap.x, trap.y) < r + trap.r) {
@@ -710,7 +966,7 @@
                 }
             }
 
-            // ---- 星星碰撞 ----
+            // 星星
             for (const star of game.stars) {
                 if (!star.active) continue;
                 if (dist(ball.x, ball.y, star.x, star.y) < r + star.r) {
@@ -721,7 +977,7 @@
                 }
             }
 
-            // ---- 板子碰撞 (任意方向) ----
+            // 板子
             for (const board of game.boards) {
                 if (board.timer <= 0) continue;
                 const { x1, y1, x2, y2, w } = board;
@@ -750,7 +1006,6 @@
                 }
             }
 
-            // 限制速度
             const sp = Math.hypot(ball.vx, ball.vy);
             if (sp > 0) {
                 const target = ball.speed * game.speedBoost;
@@ -763,9 +1018,7 @@
             for (let i = game.boards.length - 1; i >= 0; i--) {
                 const b = game.boards[i];
                 b.timer--;
-                if (b.timer <= 0) {
-                    game.boards.splice(i, 1);
-                }
+                if (b.timer <= 0) game.boards.splice(i, 1);
             }
         }
 
@@ -797,7 +1050,6 @@
                 showOverlay('💀 游戏结束', `得分: ${game.score}`, false);
                 return;
             }
-            // 重置小球位置（不会因为出界而触发掉血）
             const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.8;
             const speed = CONFIG.ballSpeed;
             game.ball.x = W / 2 + (Math.random() - 0.5) * 100;
@@ -831,15 +1083,7 @@
         }
 
         function showFloatingText(x, y, text, color) {
-            game.rewardEffects.push({
-                x,
-                y,
-                text,
-                color,
-                life: 80,
-                alpha: 1,
-                isParticle: false,
-            });
+            game.rewardEffects.push({ x, y, text, color, life: 80, alpha: 1, isParticle: false });
         }
 
         function spawnParticles(x, y, color, count) {
@@ -854,7 +1098,7 @@
                     life: 30 + Math.random() * 30,
                     alpha: 1,
                     size: 2 + Math.random() * 4,
-                    color: color,
+                    color,
                     isParticle: true,
                 });
             }
@@ -891,12 +1135,11 @@
         }
 
         // ============================================================
-        //  渲染
+        //  渲染 (精简版，保留核心视觉)
         // ============================================================
         function render() {
             ctx.clearRect(0, 0, W, H);
 
-            // 背景
             const grad = ctx.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, 500);
             grad.addColorStop(0, '#141e33');
             grad.addColorStop(1, '#090d1a');
@@ -918,7 +1161,7 @@
                 ctx.stroke();
             }
 
-            // ---- 砖块 ----
+            // 砖块
             for (const brick of game.bricks) {
                 if (brick.state === 'destroyed') continue;
                 const { x, y, w, h, state, color } = brick;
@@ -955,16 +1198,6 @@
                         ctx.lineTo(cx + Math.cos(a) * len, cy + Math.sin(a) * len);
                         ctx.stroke();
                     }
-                    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-                    ctx.lineWidth = 1;
-                    for (let i = 0; i < 2; i++) {
-                        const a = angle + 1.2 + i * 0.6;
-                        const len = Math.min(w, h) * 0.25;
-                        ctx.beginPath();
-                        ctx.moveTo(cx + Math.cos(a + 0.3) * len * 0.5, cy + Math.sin(a + 0.3) * len * 0.5);
-                        ctx.lineTo(cx + Math.cos(a) * len, cy + Math.sin(a) * len);
-                        ctx.stroke();
-                    }
                 }
                 ctx.globalAlpha = 1;
                 ctx.shadowBlur = 0;
@@ -976,7 +1209,7 @@
                 }
             }
 
-            // ---- 陷阱 ----
+            // 陷阱
             for (const trap of game.traps) {
                 if (!trap.active) continue;
                 const { x, y, r } = trap;
@@ -1009,13 +1242,9 @@
                 ctx.moveTo(x + s, y - s);
                 ctx.lineTo(x - s, y + s);
                 ctx.stroke();
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.beginPath();
-                ctx.arc(x - r * 0.25, y - r * 0.25, r * 0.2, 0, Math.PI * 2);
-                ctx.fill();
             }
 
-            // ---- 星星 ----
+            // 星星
             for (const star of game.stars) {
                 if (!star.active) continue;
                 const { x, y, r } = star;
@@ -1052,7 +1281,7 @@
                 ctx.fill();
             }
 
-            // ---- 板子 (任意方向) ----
+            // 板子
             for (const board of game.boards) {
                 const alpha = Math.min(1, board.timer / 30);
                 const { x1, y1, x2, y2, w } = board;
@@ -1065,14 +1294,12 @@
                     uy = dy / len;
                 const nx = -uy,
                     ny = ux;
-
                 const corners = [
                     { x: x1 + nx * half, y: y1 + ny * half },
                     { x: x1 - nx * half, y: y1 - ny * half },
                     { x: x2 - nx * half, y: y2 - ny * half },
                     { x: x2 + nx * half, y: y2 + ny * half },
                 ];
-
                 ctx.globalAlpha = alpha;
                 ctx.shadowColor = 'rgba(78,205,196,0.5)';
                 ctx.shadowBlur = 18;
@@ -1089,7 +1316,6 @@
                 for (let i = 1; i < 4; i++) ctx.lineTo(corners[i].x, corners[i].y);
                 ctx.closePath();
                 ctx.fill();
-
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = 'rgba(255,255,255,0.25)';
                 const midX = (x1 + x2) / 2,
@@ -1102,7 +1328,6 @@
                 ctx.lineWidth = 3;
                 ctx.strokeStyle = 'rgba(255,255,255,0.2)';
                 ctx.stroke();
-
                 ctx.strokeStyle = 'rgba(255,255,255,0.15)';
                 ctx.lineWidth = 1;
                 ctx.beginPath();
@@ -1110,10 +1335,8 @@
                 for (let i = 1; i < 4; i++) ctx.lineTo(corners[i].x, corners[i].y);
                 ctx.closePath();
                 ctx.stroke();
-
                 ctx.globalAlpha = 1;
                 ctx.shadowBlur = 0;
-
                 const pct = board.timer / CONFIG.boardDuration;
                 const barLen = len * 0.8;
                 const startX = midX - ux * barLen * 0.5 + nx * (half + 4);
@@ -1131,7 +1354,7 @@
                 ctx.stroke();
             }
 
-            // ---- 小球 ----
+            // 小球
             const ball = game.ball;
             for (let i = 0; i < ball.trail.length; i++) {
                 const t = ball.trail[i];
@@ -1144,7 +1367,6 @@
                 ctx.fill();
             }
             ctx.globalAlpha = 1;
-
             const grad4 = ctx.createRadialGradient(
                 ball.x - ball.r * 0.3, ball.y - ball.r * 0.3, ball.r * 0.1,
                 ball.x, ball.y, ball.r
@@ -1158,7 +1380,6 @@
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
             ctx.fill();
-
             ctx.shadowBlur = 0;
             ctx.fillStyle = 'rgba(255,255,255,0.5)';
             ctx.beginPath();
@@ -1179,7 +1400,6 @@
                 ctx.stroke();
                 ctx.shadowBlur = 0;
             }
-
             if (game.speedBoost > 1 && game.speedBoostTimer > 0) {
                 ctx.fillStyle = 'rgba(247,212,74,0.15)';
                 ctx.beginPath();
@@ -1191,7 +1411,7 @@
                 ctx.fillText('⚡', ball.x, ball.y - ball.r - 18);
             }
 
-            // ---- 奖励特效 ----
+            // 特效
             for (const ef of game.rewardEffects) {
                 ctx.globalAlpha = ef.alpha || 1;
                 if (ef.isParticle) {
@@ -1215,7 +1435,7 @@
                 ctx.globalAlpha = 1;
             }
 
-            // ---- 绘制中的板子预览 ----
+            // 预览
             if (game.drawing) {
                 const x1 = game.drawStartX,
                     y1 = game.drawStartY;
@@ -1224,11 +1444,9 @@
                 const len = dist(x1, y1, x2, y2);
                 const cost = len * CONFIG.staminaCostPerPixel;
                 const canAfford = game.stamina >= cost && len > 10;
-
                 ctx.globalAlpha = 0.5;
                 ctx.shadowColor = 'rgba(78,205,196,0.3)';
                 ctx.shadowBlur = 15;
-
                 const previewColor = canAfford ? 'rgba(78,205,196,0.5)' : 'rgba(255,80,80,0.5)';
                 const half = CONFIG.boardWidth / 2;
                 const dx = x2 - x1,
@@ -1251,7 +1469,6 @@
                     for (let i = 1; i < 4; i++) ctx.lineTo(corners[i].x, corners[i].y);
                     ctx.closePath();
                     ctx.fill();
-
                     if (len > 10) {
                         ctx.shadowBlur = 0;
                         ctx.globalAlpha = 0.7;
@@ -1268,16 +1485,15 @@
                 ctx.shadowBlur = 0;
             }
 
-            // ---- 底部提示 ----
             if (game.state === 'playing') {
                 const intact = game.bricks.filter(b => b.state !== 'destroyed').length;
                 ctx.fillStyle = 'rgba(255,255,255,0.06)';
                 ctx.font = '13px sans-serif';
                 ctx.textAlign = 'left';
-                ctx.fillText(`🧱 剩余砖块: ${intact}  |  🎯 任意方向画板  |  🛡️ 边框反弹`, 16, H - 14);
+                ctx.fillText(`🧱 ${intact}  |  🎯 任意画板  |  🛡️ 边框反弹`, 16, H - 14);
                 ctx.textAlign = 'right';
                 ctx.fillStyle = 'rgba(255,255,255,0.04)';
-                ctx.fillText(`v3.0`, W - 16, H - 14);
+                ctx.fillText(`v4.0`, W - 16, H - 14);
             }
         }
 
@@ -1310,7 +1526,7 @@
         }
 
         // ============================================================
-        //  游戏循环
+        //  游戏循环 & 重置
         // ============================================================
         function gameLoop() {
             update();
@@ -1318,14 +1534,9 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // ============================================================
-        //  重置
-        // ============================================================
         function resetGame() {
+            syncConfigFromUI();
             initGame();
-            updateLivesUI();
-            updateScoreUI();
-            updateStaminaUI();
             overlay.classList.remove('show');
         }
 
@@ -1336,19 +1547,40 @@
             if (e.key === 'r' || e.key === 'R') resetGame();
         });
 
+        // ---- 配置面板事件 ----
+        configToggle.addEventListener('click', () => {
+            configGrid.classList.toggle('open');
+        });
+
+        // 滑块实时更新显示值
+        for (const key in inputs) {
+            if (inputs[key]) {
+                inputs[key].addEventListener('input', () => {
+                    if (displays[key]) {
+                        displays[key].textContent = inputs[key].value;
+                    }
+                });
+            }
+        }
+
+        applyBtn.addEventListener('click', applyConfigAndReset);
+
+        document.querySelectorAll('.btn-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyPreset(btn.dataset.preset);
+            });
+        });
+
         // ============================================================
         //  启动
         // ============================================================
         initGame();
-        updateLivesUI();
-        updateScoreUI();
-        updateStaminaUI();
         gameLoop();
 
-        console.log('🎮 弹球大作战 v3.0 - 四周边框仅反弹，不掉血');
-        console.log('🖱️ 按住鼠标任意方向拖动画板');
-        console.log('💔 只有触碰陷阱才会损失生命');
-        console.log('⌨️ 按 R 键重新开始');
+        console.log('🎮 弹球大作战 v4.0 - 可视化关卡配置');
+        console.log('⚙️ 点击「关卡配置」调整地图和参数');
+        console.log('📦 预设：经典 / 密集 / 练习 / 混乱');
+        console.log('⌨️ 按 R 键快速重启');
     </script>
 </body>
 </html>
