@@ -1,0 +1,68 @@
+// Terrain type definitions
+// moveCost keyed by movementType: infantry, armored, cavalry, flying
+export const TERRAIN = {
+  plains: {
+    id: 'plains',
+    name: '平地',
+    defBonus: 0,
+    avoidBonus: 5,
+    hpRegen: 0,
+    moveCost: { infantry: 1, armored: 1, cavalry: 1, flying: 1 },
+  },
+  forest: {
+    id: 'forest',
+    name: '森林',
+    defBonus: 0,
+    avoidBonus: 15,
+    hpRegen: 0,
+    moveCost: { infantry: 2, armored: 2, cavalry: 3, flying: 1 },
+  },
+  mountain: {
+    id: 'mountain',
+    name: '山地',
+    defBonus: 0,
+    avoidBonus: 25,
+    hpRegen: 0,
+    moveCost: { infantry: 4, armored: Infinity, cavalry: Infinity, flying: 1 },
+  },
+  road: {
+    id: 'road',
+    name: '道路',
+    defBonus: 0,
+    avoidBonus: 0,
+    hpRegen: 0,
+    moveCost: { infantry: 1, armored: 1, cavalry: 1, flying: 1 },
+  },
+  water: {
+    id: 'water',
+    name: '水域',
+    defBonus: 0,
+    avoidBonus: 0,
+    hpRegen: 0,
+    moveCost: { infantry: Infinity, armored: Infinity, cavalry: Infinity, flying: 1 },
+  },
+  wall: {
+    id: 'wall',
+    name: '墙壁',
+    defBonus: 0,
+    avoidBonus: 0,
+    hpRegen: 0,
+    moveCost: { infantry: Infinity, armored: Infinity, cavalry: Infinity, flying: Infinity },
+  },
+  gate: {
+    id: 'gate',
+    name: '城门',
+    defBonus: 0,
+    avoidBonus: 20,
+    hpRegen: 5,
+    moveCost: { infantry: 1, armored: 1, cavalry: 1, flying: 1 },
+  },
+  throne: {
+    id: 'throne',
+    name: '王座',
+    defBonus: 0,
+    avoidBonus: 20,
+    hpRegen: 5,
+    moveCost: { infantry: 1, armored: 1, cavalry: 1, flying: 1 },
+  },
+};
